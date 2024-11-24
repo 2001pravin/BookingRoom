@@ -7,13 +7,7 @@ import java.time.temporal.ChronoUnit;
 
 public class CancellationPolicy {
 
-    /**
-     * Calculates the refund amount based on the cancellation date.
-     *
-     * @param checkInDate     the date the booking was supposed to start
-     * @param cancellationDate the date the booking was cancelled
-     * @return the refund amount
-     */
+   
     public static double calculateRefund(LocalDate checkInDate, LocalDate cancellationDate) {
         long daysBetween = ChronoUnit.DAYS.between(cancellationDate, checkInDate);
         double refund;
