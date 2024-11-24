@@ -1,22 +1,25 @@
-package com.BookingRoom.Controllers;
-
-import org.springframework.stereotype.Controller;
+package com.BookingRoom.Controller;
 
 import com.BookingRoom.DTO.BookingDTO;
-import com.BookingRoom.Service.BookingService;
+import com.BookingRoom.Entity.Booking;
+import com.BookingRoom.Entity.Room;
+import com.BookingRoom.Entity.Users;
+import com.BookingRoom.Service.IBookingService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/bookings")
 public class BookingController {
 
     @Autowired
-    private BookingService bookingService;
+    private IBookingService bookingService;
 
     @PostMapping("/book")
     public ResponseEntity<BookingDTO> bookRoom(
@@ -26,7 +29,8 @@ public class BookingController {
             @RequestParam String checkOut) {
         LocalDate checkInDate = LocalDate.parse(checkIn);
         LocalDate checkOutDate = LocalDate.parse(checkOut);
-        BookingDTO bookingDTO = bookingService.toDto(bookingService.bookRoom(userId, roomId, checkInDate, checkOutDate));
+        Booking booking = bookingService.bookRoom(userId, roomId, checkInDate, checkOutDate);
+        BookingDTO bookingDTO = convertToDto(booking);
         return ResponseEntity.ok(bookingDTO);
     }
 
@@ -34,9 +38,9 @@ public class BookingController {
     public ResponseEntity<BookingDTO> updateBooking(
             @PathVariable Long bookingId,
             @RequestBody BookingDTO bookingDTO) {
-        BookingDTO updatedBooking = bookingService.updateBooking(bookingId, bookingDTO);
-        if (updatedBooking != null) {
-            return ResponseEntity.ok(updatedBooking);
+        BookingDTO updatedBookingDTO = bookingService.updateBooking(bookingId, bookingDTO);
+        if (updatedBookingDTO != null) {
+            return ResponseEntity.ok(updatedBookingDTO);
         }
         return ResponseEntity.notFound().build();
     }
@@ -63,5 +67,25 @@ public class BookingController {
     public ResponseEntity<List<BookingDTO>> getAllBookings() {
         List<BookingDTO> bookings = bookingService.getAllBookings();
         return ResponseEntity.ok(bookings);
+    }
+
+    private BookingDTO convertToDto(Booking booking) {
+        BookingDTO bookingDTO = new BookingDTO();
+        bookingDTO.setId(booking.getId());
+        bookingDTO.setUserId(booking.getUser().getId());
+        bookingDTO.setRoomId(booking.getRoom().getId());
+        bookingDTO.setCheckInDate(booking.getCheckInDate());
+        bookingDTO.setCheckOutDate(booking.getCheckOutDate());
+        return bookingDTO;
+    }
+
+    private Booking convertToEntity(BookingDTO bookingDTO) {
+        Booking booking = new Booking();
+        booking.setId(bookingDTO.getId());
+        booking.setUser(new Users(bookingDTO.getUserId()));
+        booking.setRoom(new Room(bookingDTO.getRoomId()));
+        booking.setCheckInDate(bookingDTO.getCheckInDate());
+        booking.setCheckOutDate(bookingDTO.getCheckOutDate());
+        return booking;
     }
 }
