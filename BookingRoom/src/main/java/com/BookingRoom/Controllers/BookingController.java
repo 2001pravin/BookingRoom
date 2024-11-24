@@ -1,4 +1,4 @@
-package com.BookingRoom.Controller;
+package com.BookingRoom.Controllers;
 
 import com.BookingRoom.DTO.BookingDTO;
 import com.BookingRoom.Entity.Booking;
